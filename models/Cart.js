@@ -25,34 +25,26 @@ class Cart {
     }
   }
 
-  static async add(productName) {
-    const db = getDatabase();
-
-    try {
-      const product = await Product.findByName(productName);
-
-      if (!product) {
-        throw Error(`Product '${productName}' not found`);
-      }
-
-      const cart = await this.getCart();
-      const searchedProduct = cart.items.find(
-        (item) => item.product.name === productName
-      );
-
-      if (searchedProduct) {
-        searchedProduct.quantity += 1;
-      } else {
-        cart.items.push({ product, quantity: 1 });
-      }
-
-      await db
-        .collection(COLLECTION_NAME)
-        .updateOne({}, { $set: { items: cart.items } });
-    } catch (error) {
-      console.error("Error occurred while adding product to cart");
-    }
+    static async add(product) {
+  if (!product || !product.name || typeof product.price !== "number") {
+    throw new Error("Invalid product object");
   }
+
+  const db = getDatabase();
+  const cart = await this.getCart();
+
+  const existingItem = cart.items.find(item => item.product.name === product.name);
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.items.push({ product, quantity: 1 });
+  }
+
+  await db.collection(COLLECTION_NAME).updateOne({}, { $set: { items: cart.items } });
+}
+
+
 
   static async getItems() {
     try {
@@ -113,6 +105,23 @@ class Cart {
       console.error("Error occurred while clearing cart");
     }
   }
+
+  static async deleteProductByName(productName) {
+  const db = getDatabase();
+
+  try {
+    const cart = await this.getCart();
+    const updatedItems = cart.items.filter(
+      (item) => item.product.name !== productName
+    );
+
+    await db
+      .collection(COLLECTION_NAME)
+      .updateOne({}, { $set: { items: updatedItems } });
+  } catch (error) {
+    console.error("Error occurred while deleting product from cart");
+  }
+}
 }
 
 module.exports = Cart;

@@ -6,7 +6,7 @@ const { STATUS_CODE } = require("../constants/statusCode");
 const cartController = require("./cartController");
 
 exports.getProductsView = async (request, response) => {
-  const cartCount = cartController.getProductsCount();
+  const cartCount = await cartController.getProductsCount();
   const products = await Product.getAll();
 
   response.render("products.ejs", {
@@ -66,4 +66,12 @@ exports.deleteProduct = async (request, response) => {
   await Product.deleteByName(name);
 
   response.status(STATUS_CODE.OK).json({ success: true });
+};
+
+exports.addProduct = async (request, response) => {
+  const { STATUS_CODE } = require("../constants/statusCode");
+  const Product = require("../models/Product");
+
+  await Product.add(request.body);
+  response.status(STATUS_CODE.FOUND).redirect("/products/new");
 };

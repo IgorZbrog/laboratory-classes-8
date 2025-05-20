@@ -12,11 +12,13 @@ const homeRoutes = require("./routing/home");
 const { STATUS_CODE } = require("./constants/statusCode");
 const { MENU_LINKS } = require("./constants/navigation");
 const cartController = require("./controllers/cartController");
+const cartRoutes = require("./routing/cart");
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
+app.use("/cart", cartRoutes);
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: false }));
